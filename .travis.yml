@@ -1,0 +1,20 @@
+---
+language: python
+
+
+matrix: 
+  include:
+    - os: linux
+      dist: trusty
+      python: "2.7"
+    - os: linux
+      dist: xenial
+      python: "2.7"
+
+before_install:
+  - sudo setup.sh
+
+install: 
+  - pip install .
+
+script: pytest
