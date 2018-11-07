@@ -2,8 +2,7 @@
 
 # check ptrace_scope for PIN
 if ! grep -qF "0" /proc/sys/kernel/yama/ptrace_scope; then
-  echo "Please run 'echo 0|sudo tee /proc/sys/kernel/yama/ptrace_scope'"
-  exit -1
+  echo 0|sudo tee /proc/sys/kernel/yama/ptrace_scope
 fi
 
 git submodule init
