@@ -11,7 +11,7 @@ matrix:
       python: "2.7"
 
 before_install:
-  - sudo setup.sh
+  - sudo ./setup.sh
 
 install: 
   - pip install .
