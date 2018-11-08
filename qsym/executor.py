@@ -67,10 +67,11 @@ class Executor(object):
 
     def check_elf32(self):
         # assume cmd[0] is always the target binary (?)
-        with open(self.cmd[0]) as f:
-           d = f.read(5)
-           l.debug(" binary: %s %x" % (self.cmd[0],ord(d[4])))
-           return d[4] == chr(01)
+        if os.path.exists(self.cmd[0]):
+            with open(self.cmd[0]) as f:
+               d = f.read(5)
+               return len(d) > 4 and d[4] == chr(01)
+        return false
 
     def gen_cmd(self, timeout):
         cmd = []
