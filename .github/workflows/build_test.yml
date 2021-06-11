@@ -2,6 +2,7 @@ name: build and test QSYM
 on: [push]
 jobs:
   build-16.04:
+    runs-on: ubuntu-latest
     container: registry.gitlab.com/wideglide/qsym:16.04
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
