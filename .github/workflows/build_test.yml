@@ -15,11 +15,10 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: apt-get -qq update
       - run: apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release
-      - run: source /root/venv_qsym/bin/activate
-      - run: pip -V
+      - run: /root/venv_qsym/bin/pip -V
       - run: ldconfig
       - run: export DESTDIR="."
-      - run: pip install .
-      - run: (cd tests && python build.py)
-      - run: cd tests && python -m pytest
+      - run: /root/venv_qsym/bin/pip install .
+      - run: (cd tests && /root/venv_qsym/bin/python build.py)
+      - run: cd tests && /root/venv_qsym/bin/python -m pytest
       - run: uname -a
