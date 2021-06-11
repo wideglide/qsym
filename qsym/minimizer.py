@@ -12,7 +12,7 @@ OLD = 1
 CRASH = 2
 
 TIMEOUT = 5 * 1000
-MAP_SIZE = 65536
+MAP_SIZE = int(os.getenv('AFL_MAP_SIZE', '65536'))
 
 def read_bitmap_file(bitmap_file):
     with open(bitmap_file, "rb") as f:
@@ -43,7 +43,7 @@ class TestcaseMinimizer(object):
             bitmap = [0] * map_size
         return bitmap
 
-    def check_testcase(self, testcase):
+    def check_testcase(self, testcase, stats):
         cmd = [self.showmap,
                "-t",
                str(TIMEOUT),
@@ -65,6 +65,8 @@ class TestcaseMinimizer(object):
             proc.communicate(stdin)
 
         this_bitmap = read_bitmap_file(self.temp_file)
+        if abs(proc.returncode) > 2:
+            stats.add_crash()
         return self.is_interesting_testcase(this_bitmap, proc.returncode)
 
     def is_interesting_testcase(self, bitmap, returncode):

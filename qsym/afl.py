@@ -16,6 +16,7 @@ import pyinotify
 from conf import SO
 import executor
 import minimizer
+import stats
 import utils
 
 DEFAULT_TIMEOUT = 90
@@ -27,6 +28,9 @@ MAX_CRASH_REPORTS = 30
 
 # minimum number of hang files to increase timeout
 MIN_HANG_FILES = 30
+
+# maximum files to execute per sync
+EXECUTE_PER_SYNC = 20
 
 logger = logging.getLogger('qsym.afl')
 
@@ -135,6 +139,7 @@ class AFLExecutor(object):
             showmap_cmd, afl_path, self.output, qemu_mode)
         self.import_state()
         self.make_dirs()
+        self.stats = stats.Stats(self.name, self.afl, self.cmd, self.my_dir, DEFAULT_TIMEOUT)
         atexit.register(self.cleanup)
 
     @property
@@ -217,6 +222,7 @@ class AFLExecutor(object):
                 files.append(path)
 
         files = list(set(files) - self.state.done - self.state.processed)
+        self.stats.paths_imported += len(files)
         return sorted(files,
                       key=functools.cmp_to_key(testcase_compare),
                       reverse=True)
@@ -237,6 +243,7 @@ class AFLExecutor(object):
         if retcode in [124, -9]: # killed
             shutil.copy2(fp, os.path.join(self.my_hangs, os.path.basename(fp)))
             self.state.hang.add(fp)
+            self.stats.add_hang()
         else:
             self.state.done.add(fp)
 
@@ -244,6 +251,7 @@ class AFLExecutor(object):
         if (retcode in [128 + 11, -11, 128 + 6, -6]):
             shutil.copy2(fp, os.path.join(self.my_errors, os.path.basename(fp)))
             self.report_error(fp, res.log)
+            self.stats.add_crash()
 
     def send_mail(self, subject, info, attach=None):
         if attach is None:
@@ -355,9 +363,11 @@ class AFLExecutor(object):
                 self.handle_empty_files()
                 continue
 
-            for fp in files:
+            for fp in files[:EXECUTE_PER_SYNC]:
                 self.run_file(fp)
-                break
+                self.stats.update(timeout=self.state.timeout)
+
+            self.stats.cycles_done += 1
 
     def run_file(self, fp):
         check_so_file()
@@ -369,6 +379,7 @@ class AFLExecutor(object):
         logger.debug("Run qsym: input=%s" % fp)
 
         q, ret = self.run_target()
+        self.stats.execs_done += 1
         self.handle_by_return_code(ret, fp)
         self.state.processed.add(fp)
 
@@ -376,6 +387,7 @@ class AFLExecutor(object):
         num_testcase = 0
         for testcase in q.get_testcases():
             num_testcase += 1
+            self.stats.paths_total += 1
             if not self.minimizer.check_testcase(testcase):
                 # Remove if it's not interesting testcases
                 os.unlink(testcase)
@@ -386,6 +398,7 @@ class AFLExecutor(object):
                     "id:%06d,src:%s" % (index, target))
             shutil.move(testcase, filename)
             logger.debug("Creating: %s" % filename)
+            self.stats.add_path()
 
         if os.path.exists(q.log_file):
             os.unlink(q.log_file)
