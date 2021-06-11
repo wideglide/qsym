@@ -3,7 +3,6 @@ on: [push]
 jobs:
   prep:
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/wideglide/qsym:16.04
     env:
       DESTDIR: "."
     steps:
