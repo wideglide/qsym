@@ -24,6 +24,8 @@ def parse_args():
     p.add_argument("-f", dest="filename", default=None)
     p.add_argument("-m", dest="mail", default=None)
     p.add_argument("-b", dest="asan_bin", default=None)
+    p.add_argument("--libfuzzer-harness", dest="showmap_bin", default=None,
+                   help="afl-showmap binary")
     p.add_argument("cmd", nargs="+", help="cmdline, use %s to denote a file" % qsym.utils.AT_FILE)
     return p.parse_args()
 
@@ -36,7 +38,7 @@ def main():
     check_args(args)
 
     e = qsym.afl.AFLExecutor(args.cmd, args.output, args.afl,
-            args.name, args.filename, args.mail, args.asan_bin)
+            args.name, args.filename, args.mail, args.asan_bin, args.showmap_bin)
     try:
         e.run()
     finally:

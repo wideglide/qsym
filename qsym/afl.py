@@ -117,7 +117,8 @@ class AFLExecutorState(object):
         return len(self.processed) + len(self.hang) + len(self.done)
 
 class AFLExecutor(object):
-    def __init__(self, cmd, output, afl, name, filename=None, mail=None, asan_bin=None):
+    def __init__(self, cmd, output, afl, name, filename=None, mail=None, asan_bin=None,
+                 showmap_bin=None):
         self.cmd = cmd
         self.output = output
         self.afl = afl
@@ -127,9 +128,11 @@ class AFLExecutor(object):
         self.set_asan_cmd(asan_bin)
 
         self.tmp_dir = tempfile.mkdtemp()
-        cmd, afl_path, qemu_mode = self.parse_fuzzer_stats()
+        showmap_cmd, afl_path, qemu_mode = self.parse_fuzzer_stats()
+        if showmap_bin is not None:
+            showmap_cmd = [showmap_bin, "@@"]
         self.minimizer = minimizer.TestcaseMinimizer(
-            cmd, afl_path, self.output, qemu_mode)
+            showmap_cmd, afl_path, self.output, qemu_mode)
         self.import_state()
         self.make_dirs()
         atexit.register(self.cleanup)
