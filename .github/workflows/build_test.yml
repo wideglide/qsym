@@ -4,7 +4,6 @@ jobs:
   build-1604:
     runs-on: ubuntu-latest
     container: registry.gitlab.com/wideglide/qsym:16.04
-    needs: prep
     env:
       DESTDIR: "."
     steps:
