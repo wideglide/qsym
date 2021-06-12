@@ -16,10 +16,9 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: apt-get -qq update
-      - run: apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release sudo
+      - run: apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release
       - run: /root/venv_qsym/bin/pip -V
       - run: ldconfig
-      - run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       - run: cat /proc/sys/kernel/yama/ptrace_scope
       - run: /root/venv_qsym/bin/pip install .
       - run: (cd tests && /root/venv_qsym/bin/python build.py)
