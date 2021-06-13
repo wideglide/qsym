@@ -19,8 +19,8 @@ jobs:
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - run: apt-get -qq update
-      - run: apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release
+      - run: sudo apt-get -qq update
+      - run: sudo apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release
       - run: pip install --upgrade pip 
       - run: pip install --upgrade wheel
       - run: pip install --upgrade 'setuptools<45.0.0'
@@ -29,15 +29,15 @@ jobs:
       - run: wget -qO /tmp/z3x86.zip 'https://github.com/Z3Prover/z3/releases/download/z3-4.6.0/z3-4.6.0-x86-ubuntu-14.04.zip'
       - run: unzip -jd /usr/lib32 /tmp/z3x86.zip "*/bin/libz3.so"
       - run: wget -qO /tmp/z3x64.zip 'https://github.com/Z3Prover/z3/releases/download/z3-4.6.0/z3-4.6.0-x64-ubuntu-16.04.zip'
-      - run: unzip -jd /usr/include /tmp/z3x64.zip "*/include/*.h"
-      - run: unzip -jd /usr/lib /tmp/z3x64.zip "*/bin/libz3.so"
-      - run: unzip -jd /usr/bin /tmp/z3x64.zip "*/bin/z3"
+      - run: sudo unzip -jd /usr/include /tmp/z3x64.zip "*/include/*.h"
+      - run: sudo unzip -jd /usr/lib /tmp/z3x64.zip "*/bin/libz3.so"
+      - run: sudo unzip -jd /usr/bin /tmp/z3x64.zip "*/bin/z3"
       - run: wget -qO /tmp/llvm.tar.xz 'https://releases.llvm.org/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz'
-      - run: tar -C /usr/local --strip-components=1 -xf /tmp/llvm.tar.xz
-      - run: ldconfig
+      - run: sudo tar -C /usr/local --strip-components=1 -xf /tmp/llvm.tar.xz
+      - run: sudo ldconfig
       - run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       - run: cat /proc/sys/kernel/yama/ptrace_scope
-      - run: /root/venv_qsym/bin/pip install .
+      - run: pip install .
       - run: (cd tests && /root/venv_qsym/bin/python build.py)
       - run: cd tests && /root/venv_qsym/bin/python -m pytest
       - run: uname -a
