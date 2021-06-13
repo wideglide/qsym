@@ -2,8 +2,7 @@ name: build and test QSYM
 on: [push]
 jobs:
   build-1604:
-    runs-on: ubuntu-latest
-    container: registry.gitlab.com/wideglide/qsym:16.04
+    runs-on: ubuntu-16.04
     env:
       DESTDIR: "."
     steps:
@@ -13,14 +12,33 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - name: Set up Python 2.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 2.7
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: apt-get -qq update
       - run: apt-get -qq install -y build-essential gcc-multilib g++-multilib libstdc++6 libpython-dev python-pip python-virtualenv unzip sudo wget lsb-release
-      - run: /root/venv_qsym/bin/pip -V
+      - run: pip install --upgrade pip 
+      - run: pip install --upgrade wheel
+      - run: pip install --upgrade 'setuptools<45.0.0'
+      - run: pip install six
+      - run: pip install pytest-xdist
+      - run: wget -qO /tmp/z3x86.zip 'https://github.com/Z3Prover/z3/releases/download/z3-4.6.0/z3-4.6.0-x86-ubuntu-14.04.zip'
+      - run: unzip -jd /usr/lib32 /tmp/z3x86.zip "*/bin/libz3.so"
+      - run: wget -qO /tmp/z3x64.zip 'https://github.com/Z3Prover/z3/releases/download/z3-4.6.0/z3-4.6.0-x64-ubuntu-16.04.zip'
+      - run: unzip -jd /usr/include /tmp/z3x64.zip "*/include/*.h"
+      - run: unzip -jd /usr/lib /tmp/z3x64.zip "*/bin/libz3.so"
+      - run: unzip -jd /usr/bin /tmp/z3x64.zip "*/bin/z3"
+      - run: wget -qO /tmp/llvm.tar.xz 'https://releases.llvm.org/3.8.1/clang+llvm-3.8.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz'
+      - run: tar -C /usr/local --strip-components=1 -xf /tmp/llvm.tar.xz
       - run: ldconfig
+      - run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       - run: cat /proc/sys/kernel/yama/ptrace_scope
       - run: /root/venv_qsym/bin/pip install .
       - run: (cd tests && /root/venv_qsym/bin/python build.py)
       - run: cd tests && /root/venv_qsym/bin/python -m pytest
       - run: uname -a
+      - run: echo "🍏 This job's status is ${{ job.status }}."
