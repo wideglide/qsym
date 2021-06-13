@@ -38,7 +38,7 @@ jobs:
       - run: echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
       - run: cat /proc/sys/kernel/yama/ptrace_scope
       - run: pip install .
-      - run: (cd tests && /root/venv_qsym/bin/python build.py)
-      - run: cd tests && /root/venv_qsym/bin/python -m pytest
+      - run: (cd tests && python2 build.py)
+      - run: cd tests && python2 -m pytest
       - run: uname -a
       - run: echo "🍏 This job's status is ${{ job.status }}."
